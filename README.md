@@ -1,1 +1,1 @@
-Image resizer service
+# Image resizer service
