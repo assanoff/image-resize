@@ -15,6 +15,7 @@ import (
 
 type Message struct {
 	ID   string `json:"id"`
+	Size uint   `json: "size"`
 	Body string `json:"body"`
 }
 
@@ -24,7 +25,7 @@ func main() {
 	http.HandleFunc("/image", ImageHandler)
 
 	fmt.Println("Server is started...")
-	http.ListenAndServe(":8989", nil)
+	http.ListenAndServe(":3220", nil)
 
 }
 
@@ -34,6 +35,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ImageHandler(w http.ResponseWriter, r *http.Request) {
+	//Read body
 	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
@@ -41,6 +43,7 @@ func ImageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Parse JSON
 	var msg Message
 	err = json.Unmarshal(b, &msg)
 	if err != nil {
@@ -48,7 +51,43 @@ func ImageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	output, err := json.Marshal(msg)
+	// output, err := json.Marshal(msg)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), 500)
+	// 	return
+	// }
+
+	// w.Header().Set("content-type", "application/json")
+	// w.Write(output)
+
+	//Decode string to image
+	sourceImage, err := base64.StdEncoding.DecodeString(msg.Body)
+	//fmt.Println("body:.............................: " + msg.Body)
+
+	//Decode from bytes to image
+	imgSource, _, err := image.Decode(bytes.NewReader(sourceImage))
+
+	if err != nil {
+		fmt.Printf("Error decoding string: %s ", err.Error())
+		return
+	}
+
+	//Resize image
+	m := resize.Resize(msg.Size, msg.Size, imgSource, resize.Lanczos3)
+	buf := new(bytes.Buffer)
+	err = jpeg.Encode(buf, m, nil)
+	imageBit := buf.Bytes()
+	/*Defining the new image size*/
+
+	photoBase64 := base64.StdEncoding.EncodeToString([]byte(imageBit))
+	//fmt.Println("Photo Base64.............................: " + photoBase64)
+
+	outputMsg := Message{}
+	outputMsg.ID = msg.ID
+	outputMsg.Size = msg.Size
+	outputMsg.Body = photoBase64
+
+	output, err := json.Marshal(outputMsg)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
@@ -56,24 +95,5 @@ func ImageHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("content-type", "application/json")
 	w.Write(output)
-
-	sourceImage, err := base64.StdEncoding.DecodeString(msg.Body)
-	fmt.Println("body:.............................: " + msg.Body)
-
-	img1, _, err := image.Decode(bytes.NewReader(sourceImage))
-
-	if err != nil {
-		fmt.Printf("Error decoding string: %s ", err.Error())
-		return
-	}
-
-	m := resize.Resize(200, 200, img1, resize.Lanczos3)
-	buf := new(bytes.Buffer)
-	err = jpeg.Encode(buf, m, nil)
-	imageBit := buf.Bytes()
-	/*Defining the new image size*/
-
-	photoBase64 := base64.StdEncoding.EncodeToString([]byte(imageBit))
-	fmt.Println("Photo Base64.............................: " + photoBase64)
-
+	fmt.Println(outputMsg.ID)
 }
