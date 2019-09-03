@@ -7,16 +7,19 @@ import (
 	"fmt"
 	"image"
 	"image/jpeg"
+	"image/png"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/nfnt/resize"
 )
 
 type Message struct {
-	ID   string `json:"id"`
-	Size uint   `json: "size"`
-	Body string `json:"body"`
+	ID     string `json:"id"`
+	Size   uint   `json: "size"`
+	Body   string `json:"body"`
+	Format string `json:"format"`
 }
 
 func main() {
@@ -75,7 +78,19 @@ func ImageHandler(w http.ResponseWriter, r *http.Request) {
 	//Resize image
 	m := resize.Resize(msg.Size, msg.Size, imgSource, resize.Lanczos3)
 	buf := new(bytes.Buffer)
-	err = jpeg.Encode(buf, m, nil)
+	format := strings.ToLower(msg.Format)
+
+	switch format {
+	case "jpg":
+		err = jpeg.Encode(buf, m, nil)
+	case "jpeg":
+		err = jpeg.Encode(buf, m, nil)
+	case "png":
+		err = png.Encode(buf, m)
+	default:
+		fmt.Println("Unknown format")
+	}
+
 	imageBit := buf.Bytes()
 	/*Defining the new image size*/
 
@@ -95,5 +110,5 @@ func ImageHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("content-type", "application/json")
 	w.Write(output)
-	fmt.Println(outputMsg.ID)
+	fmt.Printf("s%\ts%", outputMsg.ID, format)
 }
