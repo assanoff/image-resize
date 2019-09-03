@@ -1,0 +1,11 @@
+# Compiled source #
+###################
+
+*.exe
+
+*.o
+*.so
+*.com
+*.pdb
+*.ini
+ImgHost_format
