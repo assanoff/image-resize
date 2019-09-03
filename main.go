@@ -17,7 +17,7 @@ import (
 
 type Message struct {
 	ID     string `json:"id"`
-	Size   uint   `json: "size"`
+	Size   uint   `json:"size"`
 	Body   string `json:"body"`
 	Format string `json:"format"`
 }
