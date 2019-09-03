@@ -76,7 +76,7 @@ func ImageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Resize image
-	m := resize.Resize(msg.Size, msg.Size, imgSource, resize.Lanczos3)
+	m := resize.Thumbnail(msg.Size, msg.Size, imgSource, resize.Lanczos3)
 	buf := new(bytes.Buffer)
 	format := strings.ToLower(msg.Format)
 
