@@ -110,5 +110,5 @@ func ImageHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("content-type", "application/json")
 	w.Write(output)
-	fmt.Printf("s%\ts%", outputMsg.ID, format)
+	fmt.Printf("%s\t%s\n", outputMsg.ID, format)
 }
