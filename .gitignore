@@ -1,11 +1,8 @@
-# Compiled source #
-###################
+.DS_Store
+/.vscode/
 
+# Binaries for programs and plugins
 *.exe
-
-*.o
+*.exe~
 *.so
-*.com
-*.pdb
-*.ini
-ImgHost_format
+/bin/
