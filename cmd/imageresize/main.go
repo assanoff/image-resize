@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 
 	"gopkg.in/yaml.v2"
 
@@ -16,7 +17,10 @@ var (
 )
 
 func main() {
-	flag.StringVar(&configPath, "config-path", "configs/apiserver.yaml", "path to config file")
+	flag.StringVar(&configPath, "config-path", "config.yaml", "path to config file")
+	port := os.Getenv("PORT")
+	debugLevel := os.Getenv("DEBUG_LEVEL")
+
 	flag.Parse()
 
 	yamlFile, err := ioutil.ReadFile(configPath)
@@ -29,7 +33,10 @@ func main() {
 	if err != nil {
 		fmt.Errorf("could not unmarshal config", err)
 	}
+	config.Port = ":" + port
+	config.LogLevel = debugLevel
 
+	log.Printf("Starting on %s", config.Port)
 	if err := apiserver.Start(config); err != nil {
 		log.Fatal(err)
 	}
